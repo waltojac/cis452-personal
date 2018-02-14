@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/jacobwalton/Documents/Senior/cis452/cis452Personal/project2/program2/program.c
+stdio.h
+-
+stdlib.h
+-
+unistd.h
+-
+signal.h
+-
+sys/types.h
+-
+sys/wait.h
+-
+errno.h
+-
+string.h
+-
+
