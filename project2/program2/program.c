@@ -7,6 +7,9 @@
 #include <errno.h>
 #include <string.h>
 
+#define READ 0
+#define WRITE 1
+
 //function declarations
 void grabNames();
 void Searcher(int i);
@@ -19,42 +22,106 @@ char second[50];
 int numFiles = 0;
 char ** fileNames;
 int child_pid[10];
+int ** searchPipe;
+int ** statsPipe;
+char ** stats;
+
+
 
 int main(int argc, char * argv[]){
+    int i = 0;
 
-	//create fileNames array
-	fileNames = (char**)malloc(sizeof(char*)*500);
-	
-	//allocate memory
-	int i = 0;
-	for (i = 0; i < 11; i++){
-		fileNames[i] = (char*)malloc(sizeof(char*));
-	}
+    //get the file names
+    grabNames();
+    printf("%s, %s\n", fileNames[0], fileNames[1]);
 
-	//get the filenames
-	grabNames();
-	printf("%s, %s\n", fileNames[0], fileNames[1]);
+
+    //allocate pipe searchPipe array
+    searchPipe = (int**)malloc(sizeof(int*)*numFiles);
+    //allocate memory
+    for (i = 0; i < numFiles; i++){
+        searchPipe[i] = (int*)malloc(sizeof(int)*2);
+    }
+
+    //allocate pipe statsPipe array
+    statsPipe = (int**)malloc(sizeof(int*)*numFiles);
+    //allocate memory
+    for (i = 0; i < numFiles; i++){
+        statsPipe[i] = (int*)malloc(sizeof(int)*2);
+    }
+
+    //create stats array
+    stats = (char**)malloc(sizeof(char*)*500);
+    //allocate memory
+    for (i = 0; i < numFiles; i++){
+        stats[i] = (char*)malloc(sizeof(char*));
+    }
+
+
+    //open search text pipes
+    for (i = 0; i < numFiles; i++){
+        if (pipe (searchPipe[i]) < 0) {
+            perror ("plumbing problem");
+            exit(1);
+        }else{
+            printf("Pipe %d opened successfully.\n", i);
+        }
+    }
+
+    //open stats pipes
+    for (i = 0; i < numFiles; i++){
+        if (pipe (statsPipe[i]) < 0) {
+            perror ("plumbing problem");
+            exit(1);
+        }else{
+            printf("Pipe %d opened successfully.\n", i);
+        }
+    }
 
 	//spawn Searchers
 	printf("Spawning searchers...\n");
 	spawnChildren();
 
-	//loop 
-	while(1){
-		
+    int flag = 1;
+
+    //loop
+	while(flag){
+        char text[50];
+
+
+        //for output cleanliness
+        sleep(1);
+
 		//take in search string
-		
+        printf("Please enter search string: \n");
+        scanf("%s", text);
+
+        //send string to Searchers via Pipe
+        for (int j = 0; j < numFiles; j++){
+            int numBytes = (int)write(searchPipe[j][WRITE], (const void *)text, (size_t)strlen(text)+1);
+            close(searchPipe[j][READ]);
+            printf("\nNumBytes written: %d", numBytes);
+            fflush(stdout);
+
+        }
 
 
-		//send string to Searchers via Pipe
-		
+        //read from statsPipes
+        for (int j = 0; j < numFiles; j++){
+            int num = (int)read(statsPipe[j][READ], (void *) stats[j], (size_t)  sizeof (text));
+            close(statsPipe[j][READ]);
+            printf("\nNumBytes read: %d, wc: %s", num, stats[j]);
+        }
 
-		//report statistics
+        for (int j = 0; j < numFiles; j++){
+            printf("\nWord count of %s in %s is: %s.\n", text, fileNames[j], stats[j]);
+        }
+
+            //report statistics
 		
 
 		//conduct another search?
 	
-		
 	}
 
 	//graceful shutdown
@@ -66,8 +133,17 @@ void grabNames(){
 	//accept number of files
 	printf("Please enter the number of files to be searched: \n ");
 	scanf("%d", &numFiles);
-	
-	int i = 0;
+
+    //create fileNames array
+    fileNames = (char**)malloc(sizeof(char*)*500);
+
+    //allocate memory
+    int i = 0;
+    for (i = 0; i < numFiles; i++){
+        fileNames[i] = (char*)malloc(sizeof(char*));
+    }
+
+
 	for(i = 0; i < numFiles; i++){
 		//accept  file names
 		printf("Please enter filename %d: \n ", i);
@@ -93,17 +169,36 @@ void spawnChildren(){
 
 
 void Searcher(int i){
-	printf("Child %d searching %s...\n", i, fileNames[i]);
-	//open file
-	
+    //variables
+	printf("Searcher %d spawned...\n", i);
 
-	//read + search file
-	
+    //manage pipe
+    dup2(searchPipe[i][READ],STDIN_FILENO);
+    //close pipe
+    close(searchPipe[i][WRITE]);
+    close(searchPipe[i][READ]);
 
-	//send to Master via pipe
-	
+    int flag = 1;
+    while(flag) {
+        char text[50];
+        //get search text
+        int num = (int) read(STDIN_FILENO, (void *) text, (size_t) sizeof(text));
+        fflush(STDIN_FILENO);
 
-	exit(0);
+
+        printf("\nChild %d received word %s", i, text);
+
+        //open file
+
+        //read + search file
+
+
+        //send to Master via pipe
+        int numBytes = (int) write(statsPipe[i][WRITE], "1", 1);
+
+
+    }
+    exit(0);
 }
 
 
