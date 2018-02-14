@@ -27,9 +27,13 @@ int ** statsPipe;
 char ** stats;
 
 
+int saveStdout;
+
+
 
 int main(int argc, char * argv[]){
     int i = 0;
+    saveStdout = dup(1);
 
     //get the file names
     grabNames();
@@ -88,33 +92,35 @@ int main(int argc, char * argv[]){
 	while(flag){
         char text[50];
 
-
         //for output cleanliness
         sleep(1);
 
 		//take in search string
-        printf("Please enter search string: \n");
+        fflush(stdin);
+        printf("\nPlease enter search string: \n");
         scanf("%s", text);
+
+        sleep(1);
 
         //send string to Searchers via Pipe
         for (int j = 0; j < numFiles; j++){
-            int numBytes = (int)write(searchPipe[j][WRITE], (const void *)text, (size_t)strlen(text)+1);
-            close(searchPipe[j][READ]);
+            dup2(searchPipe[j][WRITE], STDOUT_FILENO);
+            int numBytes = (int)write(STDOUT_FILENO, (const void *)text, (size_t)strlen(text));
+            fflush(stdout);
+            dup2(saveStdout, 1);
             printf("\nNumBytes written: %d", numBytes);
             fflush(stdout);
-
         }
 
-
+        sleep(1);
         //read from statsPipes
         for (int j = 0; j < numFiles; j++){
-            int num = (int)read(statsPipe[j][READ], (void *) stats[j], (size_t)  sizeof (text));
-            close(statsPipe[j][READ]);
+            int num = (int)read(statsPipe[j][READ], (void *) stats[j], 15);
             printf("\nNumBytes read: %d, wc: %s", num, stats[j]);
         }
 
         for (int j = 0; j < numFiles; j++){
-            printf("\nWord count of %s in %s is: %s.\n", text, fileNames[j], stats[j]);
+            //printf("\nWord count of %s in %s is: %s.\n", text, fileNames[j], stats[j]);
         }
 
             //report statistics
@@ -180,21 +186,23 @@ void Searcher(int i){
 
     int flag = 1;
     while(flag) {
-        char text[50];
+        char * text = (char *)malloc(sizeof(char)*30);
+
         //get search text
-        int num = (int) read(STDIN_FILENO, (void *) text, (size_t) sizeof(text));
-        fflush(STDIN_FILENO);
-
-
+        fflush(stdin);
+        int num = (int)read(STDIN_FILENO, (void*)text, 30);
+        printf("\nNumBytes read: %d\n", num);
         printf("\nChild %d received word %s", i, text);
+        fflush(stdout);
 
         //open file
 
         //read + search file
 
-
         //send to Master via pipe
         int numBytes = (int) write(statsPipe[i][WRITE], "1", 1);
+
+        free(text);
 
 
     }
