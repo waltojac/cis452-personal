@@ -1,0 +1,123 @@
+--~/Documents/Senior/cis452/cis452Personal/project2/program2:./a.out
+Please enter the number of files to be searched:
+ 4
+Please enter filename 0:
+ gt.txt
+Please enter filename 1:
+ md.txt
+Please enter filename 2:
+ getty.txt
+Please enter filename 3:
+ Hamlet.txt
+Search text pipe 1 opened successfully.
+Search text pipe 2 opened successfully.
+Search text pipe 3 opened successfully.
+Search text pipe 4 opened successfully.
+Statistics pipe 1 opened successfully.
+Statistics pipe 2 opened successfully.
+Statistics pipe 3 opened successfully.
+Statistics pipe 4 opened successfully.
+Spawning searchers...
+Searcher 1 spawned...
+Searcher 2 spawned...
+
+File "gt.txt" opened successfully.
+Searcher 3 spawned...
+File "md.txt" opened successfully.
+File "getty.txt" opened successfully.Searcher 4 spawned...
+
+File "Hamlet.txt" opened successfully.
+
+Please enter search string: the
+
+Sending search string to searchers...
+Searcher 1 searching gt.txt for "the"
+Searcher 2 searching md.txt for "the"
+Searcher 3 searching getty.txt for "the"
+Searcher 4 searching Hamlet.txt for "the"
+
+--------------------------------------------
+     WORD COUNTS RECEIVED BY MASTER
+--------------------------------------------
+Word count of "the" in gt.txt is: 5489.
+Word count of "the" in md.txt is: 13694.
+Word count of "the" in getty.txt is: 9.
+Word count of "the" in Hamlet.txt is: 929.
+
+Please enter search string: it
+
+Sending search string to searchers...
+Searcher 1 searching gt.txt for "it"
+Searcher 2 searching md.txt for "it"
+Searcher 3 searching getty.txt for "it"
+Searcher 4 searching Hamlet.txt for "it"
+
+--------------------------------------------
+     WORD COUNTS RECEIVED BY MASTER
+--------------------------------------------
+Word count of "it" in gt.txt is: 619.
+Word count of "it" in md.txt is: 1506.
+Word count of "it" in getty.txt is: 1.
+Word count of "it" in Hamlet.txt is: 266.
+
+Please enter search string: he
+
+Sending search string to searchers...
+Searcher 1 searching gt.txt for "he"
+Searcher 2 searching md.txt for "he"
+Searcher 3 searching getty.txt for "he"
+Searcher 4 searching Hamlet.txt for "he"
+
+--------------------------------------------
+     WORD COUNTS RECEIVED BY MASTER
+--------------------------------------------
+Word count of "he" in gt.txt is: 630.
+Word count of "he" in md.txt is: 1493.
+Word count of "he" in getty.txt is: 0.
+Word count of "he" in Hamlet.txt is: 149.
+
+Please enter search string: ^C
+
+
+Searcher starting graceful shutdown.
+Searcher starting graceful shutdown.
+Closing pipes...
+Closing pipes...
+Pipes closed.
+Pipes closed.
+Freeing memory...
+Freeing memory...
+Memory freed.Memory freed.
+
+Searcher shut down.
+Searcher shut down.
+
+
+Searcher starting graceful shutdown.
+Closing pipes...
+Pipes closed.
+Freeing memory...
+Memory freed.
+Searcher shut down.
+
+
+Master starting graceful shutdown.
+Closing pipes...
+Pipes closed.
+
+Freeing memory...
+Memory freed.Searcher starting graceful shutdown.
+
+Master shut down.
+
+Closing pipes...
+Pipes closed.
+Freeing memory...
+Memory freed.
+Searcher shut down.
+
+--~/Documents/Senior/cis452/cis452Personal/project2/program2:ps
+  PID TTY           TIME CMD
+26730 ttys001    0:00.03 /Applications/iTerm.app/Contents/MacOS/iTerm2 --server /us
+26732 ttys001    0:00.10 -bash
+--~/Documents/Senior/cis452/cis452Personal/project2/program2:
