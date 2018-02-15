@@ -21,28 +21,34 @@
 
 //function declarations
 void grabNames();
+
 void Searcher(int i, int parentPid);
+
 void spawnChildren();
+
 int freeMemory();
+
 void sigHandlerMain(int);
+
 void sigHandlerSearcher(int);
+
 int kill(pid_t pid, int sig);
 
 //variables
 int numFiles = 0;
-char ** fileNames;
+char **fileNames;
 int child_pid[10];
-int ** searchPipe;
-int ** statsPipe;
-char ** stats;
-FILE * file;
-char * intext;
+int **searchPipe;
+int **statsPipe;
+char **stats;
+FILE *file;
+char *intext;
 int flag = 0;
 
 //for resetting the stdout
 int saveStdout;
 
-int main(int argc, char * argv[]){
+int main(int argc, char *argv[]) {
     int i = 0;
 
     //install crtl c signal handler (will be overridden by children)
@@ -56,51 +62,51 @@ int main(int argc, char * argv[]){
     flag = 1;
 
     //allocate searchPipe storage array
-    searchPipe = (int**)malloc(sizeof(int*)*numFiles);
+    searchPipe = (int **) malloc(sizeof(int *) * numFiles);
     //allocate memory
-    for (i = 0; i < numFiles; i++){
-        searchPipe[i] = (int*)malloc(sizeof(int)*2);
+    for (i = 0; i < numFiles; i++) {
+        searchPipe[i] = (int *) malloc(sizeof(int) * 2);
     }
 
     //allocate statsPipe storage array
-    statsPipe = (int**)malloc(sizeof(int*)*numFiles);
+    statsPipe = (int **) malloc(sizeof(int *) * numFiles);
     //allocate memory
-    for (i = 0; i < numFiles; i++){
-        statsPipe[i] = (int*)malloc(sizeof(int)*2);
+    for (i = 0; i < numFiles; i++) {
+        statsPipe[i] = (int *) malloc(sizeof(int) * 2);
     }
 
     //create stats array
-    stats = (char**)malloc(sizeof(char*)*500);
+    stats = (char **) malloc(sizeof(char *) * 500);
     //allocate memory
-    for (i = 0; i < numFiles; i++){
-        stats[i] = (char*)malloc(sizeof(char*));
+    for (i = 0; i < numFiles; i++) {
+        stats[i] = (char *) malloc(sizeof(char *));
     }
 
     //open search text pipes
-    for (i = 0; i < numFiles; i++){
-        if (pipe (searchPipe[i]) < 0) {
-            perror ("plumbing problem");
+    for (i = 0; i < numFiles; i++) {
+        if (pipe(searchPipe[i]) < 0) {
+            perror("plumbing problem");
             exit(1);
-        }else{
-            printf("Search text pipe %d opened successfully.\n", i+1);
+        } else {
+            printf("Search text pipe %d opened successfully.\n", i + 1);
         }
     }
 
     //open stats pipes
-    for (i = 0; i < numFiles; i++){
-        if (pipe (statsPipe[i]) < 0) {
-            perror ("plumbing problem");
+    for (i = 0; i < numFiles; i++) {
+        if (pipe(statsPipe[i]) < 0) {
+            perror("plumbing problem");
             exit(1);
-        }else{
-            printf("Statistics pipe %d opened successfully.\n", i+1);
+        } else {
+            printf("Statistics pipe %d opened successfully.\n", i + 1);
         }
     }
 
 
 
     //spawn Searchers
-	printf("Spawning searchers...\n");
-	spawnChildren();
+    printf("Spawning searchers...\n");
+    spawnChildren();
 
     //install child error signal handler for parent
     signal(SIGUSR1, sigHandlerMain);
@@ -110,14 +116,14 @@ int main(int argc, char * argv[]){
     int flag = 1;
 
     //search text loop. Asks user for search string, sends to Searchers, and report results. Repeat.
-	while(flag){
+    while (flag) {
         //input search string field
-        intext = (char *)malloc(sizeof(char)*50);
+        intext = (char *) malloc(sizeof(char) * 50);
 
         //for output cleanliness
         sleep(1);
 
-		//take in search string
+        //take in search string
         fflush(stdin);
         printf("\n\nPlease enter search string: ");
         scanf("%s", intext);
@@ -125,9 +131,9 @@ int main(int argc, char * argv[]){
         fflush(stdout);
 
         //send string to Searchers via Pipe
-        for (int j = 0; j < numFiles; j++){
+        for (int j = 0; j < numFiles; j++) {
             dup2(searchPipe[j][WRITE], STDOUT_FILENO);
-            write(STDOUT_FILENO, (const void *)intext, 50);
+            write(STDOUT_FILENO, (const void *) intext, 50);
             fflush(stdout);
             dup2(saveStdout, 1);
             //printf("\nNumBytes written: %d\n", numBytes);                 for testing
@@ -136,7 +142,7 @@ int main(int argc, char * argv[]){
 
 
         //read from statsPipes
-        for (int j = 0; j < numFiles; j++){
+        for (int j = 0; j < numFiles; j++) {
             read(statsPipe[j][READ], (void *) stats[j], 15);
             //printf("\nNumBytes read: %d, wc: %s\n", num, stats[j]);       for testing
         }
@@ -147,7 +153,7 @@ int main(int argc, char * argv[]){
         fflush(stdout);
 
         //print all the stats
-        for (int j = 0; j < numFiles; j++){
+        for (int j = 0; j < numFiles; j++) {
             printf("\nWord count of \"%s\" in %s is: %s.", intext, fileNames[j], stats[j]);
         }
 
@@ -155,22 +161,22 @@ int main(int argc, char * argv[]){
         free(intext);
 
         //repeat until SIGINT
-	}
+    }
 }
 
 /*
  * Function to gather and store the number of files and all the filenames
  */
-void grabNames(){
+void grabNames() {
 
     int valid = 1;
 
     //accept number of files
-	printf("Please enter the number of files to be searched: \n ");
-    char * strNum = (char*)malloc(sizeof(char)*2);
+    printf("Please enter the number of files to be searched: \n ");
+    char *strNum = (char *) malloc(sizeof(char) * 2);
 
     //loop to make sure a valid number is entered. 10 is the limit.
-    while(valid) {
+    while (valid) {
         scanf("%s", strNum);
         numFiles = atoi(strNum);
         if ((numFiles > 0) && numFiles < 11) {
@@ -182,45 +188,45 @@ void grabNames(){
     }
 
     //create fileNames array
-    fileNames = (char**)malloc(sizeof(char*)*500);
+    fileNames = (char **) malloc(sizeof(char *) * 500);
 
     //allocate memory
     int i = 0;
-    for (i = 0; i < numFiles; i++){
-        fileNames[i] = (char*)malloc(sizeof(char*));
+    for (i = 0; i < numFiles; i++) {
+        fileNames[i] = (char *) malloc(sizeof(char *));
     }
 
     //loop to get all filenames. Does not check filenames for validity here, but rather in searcher functions.
-	for(i = 0; i < numFiles; i++){
-		//accept  file names
-		printf("Please enter filename %d: \n ", i);
-		fflush(stdin);
-		scanf("%s", fileNames[i]);
-	}
+    for (i = 0; i < numFiles; i++) {
+        //accept  file names
+        printf("Please enter filename %d: \n ", i);
+        fflush(stdin);
+        scanf("%s", fileNames[i]);
+    }
 }
 
 /*
  * Function to spawn all the required searcher children.
  */
-void spawnChildren(){
-	int i;
+void spawnChildren() {
+    int i;
 
     //used for signalling to parent that error has occured
     int parentPid = getpid();
 
     //loop to fork all the children
-    for(i = 0; i < numFiles; i++){
-		child_pid[i] = fork();
-      	if(child_pid[i] < 0) {
-       	    perror("An error occurred while forking");
-        	exit(1);
-       	} else if(child_pid[i] == 0) {    //Child Process
+    for (i = 0; i < numFiles; i++) {
+        child_pid[i] = fork();
+        if (child_pid[i] < 0) {
+            perror("An error occurred while forking");
+            exit(1);
+        } else if (child_pid[i] == 0) {    //Child Process
             //children live and die in this function. The break will never be reached.
             Searcher(i, parentPid);
-			break;
-		 }
-	}
-	
+            break;
+        }
+    }
+
 }
 
 /*
@@ -228,14 +234,14 @@ void spawnChildren(){
  * search the file for the search string and record the word count, and send word count
  * back to parent via another pipe.
  */
-void Searcher(int i, int parentPid){
-    printf("Searcher %d spawned...\n", i+1);
+void Searcher(int i, int parentPid) {
+    printf("Searcher %d spawned...\n", i + 1);
 
     //override signal handler for searchers so they don't do mainSigHandler
     signal(SIGINT, sigHandlerSearcher);
 
     //try to open the file
-    if ((file = fopen(fileNames[i], "r")) == NULL){
+    if ((file = fopen(fileNames[i], "r")) == NULL) {
         printf("\nFile %s not opened successfully.\n", fileNames[i]);
 
         //let parent know so it can shut down other children
@@ -249,7 +255,7 @@ void Searcher(int i, int parentPid){
     fflush(stdout);
 
     //manage search text pipe
-    dup2(searchPipe[i][READ],STDIN_FILENO);
+    dup2(searchPipe[i][READ], STDIN_FILENO);
     //close search pipe
     close(searchPipe[i][WRITE]);
     close(searchPipe[i][READ]);
@@ -259,21 +265,21 @@ void Searcher(int i, int parentPid){
 
 
     int flag = 1;
-    while(flag) {
-        char * text = (char *)malloc(sizeof(char)*50);
+    while (flag) {
+        char *text = (char *) malloc(sizeof(char) * 50);
 
         //get search text from pipe
         fflush(stdin);
-        read(STDIN_FILENO, (void*)text, 50);
+        read(STDIN_FILENO, (void *) text, 50);
         fflush(stdout);
-        printf("\nSearcher %d searching %s for \"%s\"", i+1, fileNames[i], text);
+        printf("\nSearcher %d searching %s for \"%s\"", i + 1, fileNames[i], text);
         fflush(stdout);
 
         //read + search file for the search text
-        char * temp = (char*)malloc(sizeof(char)*50);
+        char *temp = (char *) malloc(sizeof(char) * 50);
         int wordCount = 0;
-        while (fscanf(file, "%s", temp) != EOF){
-            if (strcmp(temp, text) == 0 ) {
+        while (fscanf(file, "%s", temp) != EOF) {
+            if (strcmp(temp, text) == 0) {
                 wordCount++;
             }
         }
@@ -286,7 +292,7 @@ void Searcher(int i, int parentPid){
         //convert int to string
         //help found from user2622016 on stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
         int length = snprintf(NULL, 0, "%d", wordCount);
-        char * wc = (char*)malloc(length + 1);
+        char *wc = (char *) malloc(length + 1);
         snprintf(wc, length + 1, "%d", wordCount);
 
         //send word count to Master via pipe
@@ -306,19 +312,19 @@ void Searcher(int i, int parentPid){
  * because each searcher is aware of the full arrays of pipes, filenames, and stats.
  *
  */
-int freeMemory(){
+int freeMemory() {
     int i;
 
     printf("\nClosing pipes...");
 
     //close search text pipes
-    for (i = 0; i < numFiles; i++){
+    for (i = 0; i < numFiles; i++) {
         close(searchPipe[i][READ]);
         close(searchPipe[i][WRITE]);
     }
 
     //close stats pipes
-    for (i = 0; i < numFiles; i++){
+    for (i = 0; i < numFiles; i++) {
         close(statsPipe[i][READ]);
         close(statsPipe[i][WRITE]);
     }
@@ -327,25 +333,25 @@ int freeMemory(){
 
     printf("\nFreeing memory...");
     //free search pipe memory
-    for (i = 0; i < numFiles; i++){
+    for (i = 0; i < numFiles; i++) {
         free(searchPipe[i]);
     }
     free(searchPipe);
 
     //free stats pipe memory
-    for (i = 0; i < numFiles; i++){
+    for (i = 0; i < numFiles; i++) {
         free(statsPipe[i]);
     }
     free(statsPipe);
 
     //free stats memory
-    for (i = 0; i < numFiles; i++){
+    for (i = 0; i < numFiles; i++) {
         free(stats[i]);
     }
     free(stats);
 
     //free fileNames memory
-    for (i = 0; i < numFiles; i++){
+    for (i = 0; i < numFiles; i++) {
         free(fileNames[i]);
     }
     free(fileNames);
@@ -362,15 +368,15 @@ int freeMemory(){
  *
  * Handles SIGINT or SIGUSR1.
  */
-void sigHandlerMain(int sigNum){
-	
-	//graceful shutdown
-	if (sigNum == SIGINT){
+void sigHandlerMain(int sigNum) {
+
+    //graceful shutdown
+    if (sigNum == SIGINT) {
         if (flag == 0) {
             printf("\nMaster shut down.\n\n");
             fflush(stdout);
             exit(0);
-        }else {
+        } else {
             printf("\nMaster starting graceful shutdown.");
             free(intext);
             freeMemory();
@@ -380,25 +386,21 @@ void sigHandlerMain(int sigNum){
         }
     }
 
-    //for when a file is not opened successfully, Master needs to shut down all other children
-    else if(sigNum == SIGUSR1){
-        if (flag == 0) {
-            printf("\nMaster shut down.\n\n");
-            fflush(stdout);
-            exit(0);
-        } else {
-            //shutdown children
-            printf("\nMaster is killing other searchers if applicable...\n");
-            for (int i = 0; i < numFiles; i++) {
-                kill(child_pid[i], SIGINT);
-            }
-            printf("\nMaster starting graceful shutdown.");
-            free(intext);
-            freeMemory();
-            printf("\nMaster shut down.\n\n");
-            fflush(stdout);
-            exit(0);
+        //for when a file is not opened successfully, Master needs to shut down all other children
+    else if (sigNum == SIGUSR1) {
+
+        //shutdown children
+        printf("\nMaster is killing other searchers if applicable...\n");
+        for (int i = 0; i < numFiles; i++) {
+            kill(child_pid[i], SIGINT);
         }
+        printf("\nMaster starting graceful shutdown.");
+        free(intext);
+        freeMemory();
+        printf("\nMaster shut down.\n\n");
+        fflush(stdout);
+        exit(0);
+
     }
 
 }
@@ -408,10 +410,10 @@ void sigHandlerMain(int sigNum){
  *
  * Handles SIGINT
  */
-void sigHandlerSearcher(int sigNum){
+void sigHandlerSearcher(int sigNum) {
 
     //graceful shutdown
-    if (sigNum == SIGINT){
+    if (sigNum == SIGINT) {
         //change stdout back to normal
         dup2(saveStdout, STDOUT_FILENO);
         printf("\nSearcher starting graceful shutdown.");
