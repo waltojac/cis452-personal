@@ -15,12 +15,6 @@ unistd.h
 -
 signal.h
 -
-sys/types.h
--
-sys/wait.h
--
-errno.h
--
 string.h
 -
 
