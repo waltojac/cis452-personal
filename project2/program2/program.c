@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/types.h>
 
 #define READ 0
 #define WRITE 1
@@ -25,7 +26,7 @@ void spawnChildren();
 int freeMemory();
 void sigHandlerMain(int);
 void sigHandlerSearcher(int);
-
+int kill(pid_t pid, int sig);
 
 //variables
 int numFiles = 0;
