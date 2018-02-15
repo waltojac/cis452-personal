@@ -36,6 +36,7 @@ int ** statsPipe;
 char ** stats;
 FILE * file;
 char * intext;
+int flag = 0;
 
 //for resetting the stdout
 int saveStdout;
@@ -51,6 +52,7 @@ int main(int argc, char * argv[]){
 
     //get the file names
     grabNames();
+    flag = 1;
 
     //allocate searchPipe storage array
     searchPipe = (int**)malloc(sizeof(int*)*numFiles);
@@ -363,27 +365,39 @@ void sigHandlerMain(int sigNum){
 	
 	//graceful shutdown
 	if (sigNum == SIGINT){
-        printf("\nMaster starting graceful shutdown.");
-        free(intext);
-        freeMemory();
-        printf("\nMaster shut down.\n\n");
-        fflush(stdout);
-        exit(0);
+        if (flag == 0) {
+            printf("\nMaster shut down.\n\n");
+            fflush(stdout);
+            exit(0);
+        }else {
+            printf("\nMaster starting graceful shutdown.");
+            free(intext);
+            freeMemory();
+            printf("\nMaster shut down.\n\n");
+            fflush(stdout);
+            exit(0);
+        }
     }
 
     //for when a file is not opened successfully, Master needs to shut down all other children
     else if(sigNum == SIGUSR1){
-        //shutdown children
-        printf("\nMaster is killing other searchers if applicable...\n");
-        for (int i = 0; i < numFiles; i++){
-            kill(child_pid[i],SIGINT);
+        if (flag == 0) {
+            printf("\nMaster shut down.\n\n");
+            fflush(stdout);
+            exit(0);
+        } else {
+            //shutdown children
+            printf("\nMaster is killing other searchers if applicable...\n");
+            for (int i = 0; i < numFiles; i++) {
+                kill(child_pid[i], SIGINT);
+            }
+            printf("\nMaster starting graceful shutdown.");
+            free(intext);
+            freeMemory();
+            printf("\nMaster shut down.\n\n");
+            fflush(stdout);
+            exit(0);
         }
-        printf("\nMaster starting graceful shutdown.");
-        free(intext);
-        freeMemory();
-        printf("\nMaster shut down.\n\n");
-        fflush(stdout);
-        exit(0);
     }
 
 }
