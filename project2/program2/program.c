@@ -44,6 +44,7 @@ char **stats;
 FILE *file;
 char *intext;
 int flag = 0;
+int fileFlag = 0;
 
 //for resetting the stdout
 int saveStdout;
@@ -243,7 +244,7 @@ void Searcher(int i, int parentPid) {
     //try to open the file
     if ((file = fopen(fileNames[i], "r")) == NULL) {
         printf("\nFile %s not opened successfully.\n", fileNames[i]);
-
+		fileFlag = 1;
         //let parent know so it can shut down other children
         kill(parentPid, SIGUSR1);
 
@@ -409,14 +410,20 @@ void sigHandlerMain(int sigNum) {
  *
  * Handles SIGINT
  */
+<<<<<<< HEAD
 void sigHandlerSearcher(int sigNum) {
 
+=======
+void sigHandlerSearcher(int sigNum){
+>>>>>>> 8ea3f79a9f4aa10d0dbd0676e2917f08017c7165
     //graceful shutdown
     if (sigNum == SIGINT) {
         //change stdout back to normal
         dup2(saveStdout, STDOUT_FILENO);
         printf("\nSearcher starting graceful shutdown.");
-        fclose(file);
+		if (fileFlag == 0){
+        	fclose(file);
+		}
         freeMemory();
         printf("\nSearcher shut down.\n\n");
         fflush(stdout);
