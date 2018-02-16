@@ -385,7 +385,6 @@ void sigHandlerMain(int sigNum) {
             exit(0);
         }
     }
-
         //for when a file is not opened successfully, Master needs to shut down all other children
     else if (sigNum == SIGUSR1) {
 
