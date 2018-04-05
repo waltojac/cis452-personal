@@ -1,8 +1,13 @@
 '''
-Created on Apr 3, 2018
+Title: OS Paging Simulator - GUI File
+Date: Mar 26, 2018
+Description: This is the GUI class that creates the GUI window and implements action listeners
+for OS model.
 
-@author: jacobwalton
+@author: Jacob Walton
 '''
+
+#imports
 from PyQt5 import QtWidgets
 import design2, sys
 from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
@@ -10,6 +15,8 @@ from Model import fileIn, OperatingSystem, pageTable
 import copy
 from PyQt5 import QtGui
 
+
+#extends the design file created using QT designer. Adds action listeners and update funtions.
 class App(QtWidgets.QMainWindow, design2.Ui_MainWindow):
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
@@ -22,6 +29,7 @@ class App(QtWidgets.QMainWindow, design2.Ui_MainWindow):
         self.freeSquaresHist = []
         self.freeSquaresHist.append(copy.deepcopy(self.freeSquares))
 
+        #for process table display history
         self.displayed = {}
         self.displayedHist = []
         self.displayedHist.append(copy.deepcopy(self.displayed))
@@ -98,6 +106,7 @@ class App(QtWidgets.QMainWindow, design2.Ui_MainWindow):
             color = ""
             color = "background-color: " + colors[proc]
             
+            #if the process hasn't been displayed yet, assign it a free process tbale square
             if int(proc) not in self.displayed:
                 selection = self.freeSquares.pop(0)
                 self.displayed.__setitem__(proc, selection)
@@ -117,6 +126,7 @@ class App(QtWidgets.QMainWindow, design2.Ui_MainWindow):
                     self.processTable3.setText(output)
                     self.processTable3.setStyleSheet(color)
 
+            #if it's been displayed, update the square it is in.
             else:
                 selection = self.displayed[proc]
                 if (selection == 0):
@@ -146,26 +156,43 @@ class App(QtWidgets.QMainWindow, design2.Ui_MainWindow):
         self.spot = 0
         self.end = True
         
-        
+        #load the file
         file = self.openFileNameDialog()
-        self.traceName.setText(file)
-        self.lines = fileIn(file)
-        self.end = False
+        try:
+            self.traceName.setText(file)
+            self.lines = fileIn(file)
+            self.end = False
+        except:
+            pass
+        
+        #clear all process squares initially
+        self.processTable0.setText("")
+        self.processTable1.setText("")
+        self.processTable2.setText("")
+        self.processTable3.setText("")
+        self.processTable0.setStyleSheet("")
+        self.processTable1.setStyleSheet("")
+        self.processTable2.setStyleSheet("")
+        self.processTable3.setStyleSheet("")
         
         self.updateUi()
         
-    def openFileNameDialog(self):    
+    #use a file dialog to load the file
+    def openFileNameDialog(self):
         options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","All Files (*);;Python Files (*.py)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","Text Files (*.txt)", options=options)
         if fileName:
             return fileName
     
+    #when the next button is clicked
     def next(self):
+        #if the end of trace is reached, don't do anything
         if (self.spot + 1) > self.lines.__len__():
             self.end = True
         else:
             self.end = False
+            
+        #move to the next trace
         if (self.end == False):
             line = ""
             line = self.lines[self.spot]
@@ -213,7 +240,7 @@ class App(QtWidgets.QMainWindow, design2.Ui_MainWindow):
             
 
 
-    
+    #if the back button is hit
     def back(self):
         #clear all initially
         self.processTable0.setText("")
@@ -243,13 +270,10 @@ class App(QtWidgets.QMainWindow, design2.Ui_MainWindow):
             
             
             self.updateUi()
-            
-        
-
-
 
 
         
+#function to run the App
 def main():
     app = QtWidgets.QApplication(sys.argv)
     form = App()
@@ -257,7 +281,7 @@ def main():
     app.exec_()
     
     
-
+#run main if program is run
 if __name__ == '__main__':
     main()
     

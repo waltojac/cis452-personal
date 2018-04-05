@@ -1,5 +1,5 @@
 '''
-Title: OS Paging Simulator
+Title: OS Paging Simulator - Model File
 Date: Mar 26, 2018
 Description: Simulates a small paging system on an OS. 
 
@@ -20,6 +20,7 @@ class Frame():
 #class to represent a simple OS
 class OperatingSystem():
     
+    #constructor for the OS
     def __init__(self):
         #free page list
         self.freePages = [0,1,2,3,4,5,6,7]
@@ -36,7 +37,7 @@ class OperatingSystem():
         
     #function to display the M page table and each process page table
     def printTable(self):
-        print("Frame #   Pid   \tSegment    Page #") 
+        print("Frame #   Pid\tSegment\t\tPage #") 
         print("---------------------------------------")
         for frame in self.pageTables:
             #so that all pNums can be int
@@ -59,7 +60,7 @@ class OperatingSystem():
             print("--- Process " + str(proc) + " ---")
             print ("\tPage    Frame")
             text = "Text"
-            data = "Data    "
+            data = "Data"
             for frame in self.pageTables:
                 if frame.pid == proc:
                     if frame.segment == "Text":
@@ -146,9 +147,13 @@ class pageTable():
         OS.pageTables.sort(key=lambda x: x.fNum)
     
 
+#main function for command line interface
 def main ():
+    #load file
     fileName = str(input("Enter trace file name: "))
     lines = fileIn(fileName)
+    
+    #state of OS history
     OS = OperatingSystem()
     state = []
     cp = copy.deepcopy(OS)
@@ -156,6 +161,7 @@ def main ():
     spot = 0
 
     
+    #main loop for going through the trace
     val = input("Enter n for next, b for back, or q for quit: ")
     while (val == "n" or val == "b"):
         #end the trace 
@@ -207,3 +213,6 @@ def fileIn(fileName):
     file = open(fileName).read().splitlines()
     return file
 
+#run main if program is run
+if __name__ == '__main__':
+    main()
