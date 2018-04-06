@@ -203,7 +203,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Paging Simulator"))
         self.physMLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:24pt; font-weight:600;\">Physical Memory</span></p></body></html>"))
         self.pageTableLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:24pt; font-weight:600;\">Page Tables</span></p></body></html>"))
         self.lineNumberLabel.setText(_translate("MainWindow", "Line Number: "))
